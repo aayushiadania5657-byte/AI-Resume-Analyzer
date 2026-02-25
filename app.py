@@ -56,6 +56,21 @@ skills_db = {
 
 selected_role = st.sidebar.selectbox("🎯 Select Job Role", list(skills_db.keys()))
 uploaded_file = st.file_uploader("Upload Resume (PDF only)", type=["pdf"])
+st.markdown("""
+<div style="
+    background-color:#1e293b;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #2563eb;
+    text-align:center;
+    font-size:14px;
+    color:#e2e8f0;
+">
+📄 <b>Upload PDF under 50 MB</b> <br>
+For best results, use ATS-friendly resume format.
+</div>
+""", unsafe_allow_html=True)
+
 
 # -------------------------
 # MAIN LOGIC
@@ -81,6 +96,50 @@ if uploaded_file is not None:
 
     missing_skills = list(set(selected_skills) - set(found_skills))
     match_percentage = (len(found_skills) / len(selected_skills)) * 100
+    # -------------------------
+    # AUTOMATIC ROLE RECOMMENDATION
+    # -------------------------
+    role_scores = {}
+
+    for role, skills in skills_db.items():
+        matched = 0
+        for skill in skills:
+            if skill in resume_text:
+                matched += 1
+        score = (matched / len(skills)) * 100
+        role_scores[role] = score
+
+    best_role = max(role_scores, key=role_scores.get)
+    best_score = role_scores[best_role]
+
+    st.subheader("🤖 Recommended Job Role")
+    st.success(f"Best Matched Role: {best_role} ({round(best_score,2)}%)")
+    # -------------------------
+    # RESUME WRITING QUALITY SCORE
+    # -------------------------
+    action_verbs = ["developed", "implemented", "designed", "built", "created", "improved"]
+    weak_words = ["hardworking", "team player", "dedicated", "passionate"]
+
+    verb_count = sum(resume_text.count(word) for word in action_verbs)
+    weak_count = sum(resume_text.count(word) for word in weak_words)
+
+    numbers_found = len(re.findall(r'\d+%', resume_text))
+
+    writing_score = (verb_count * 5) + (numbers_found * 5) - (weak_count * 3)
+    writing_score = max(0, min(writing_score, 100))
+
+    st.subheader("✍ Resume Writing Quality Score")
+    st.progress(writing_score)
+    st.write(f"Score: {writing_score} / 100")
+
+    if writing_score >= 70:
+        st.success("Strong and Impactful Resume Writing!")
+    elif writing_score >= 40:
+        st.info("Good Resume but can be improved with quantified achievements.")
+    else:
+        st.warning("Add more action verbs and measurable achievements.")
+
+
 
     # Experience Detection
     experience_pattern = r'(\d+)\s*(years|year)'
@@ -115,6 +174,24 @@ if uploaded_file is not None:
     education_component = 10 if education_found else 0
 
     ats_score = skill_component + job_component + experience_component + education_component
+    # -------------------------
+    # SCORE BREAKDOWN
+    # -------------------------
+    st.subheader("📊 Detailed Score Breakdown")
+
+    colA, colB, colC, colD = st.columns(4)
+
+    with colA:
+        st.metric("Skills Score", f"{round(skill_component,2)} / 40")
+
+    with colB:
+        st.metric("Job Match Score", f"{round(job_component,2)} / 30")
+
+    with colC:
+        st.metric("Experience Score", f"{experience_component} / 20")
+
+    with colD:
+        st.metric("Education Score", f"{education_component} / 10")
 
     # -------------------------
     # RESUME SUMMARY
@@ -157,6 +234,22 @@ if uploaded_file is not None:
 
     st.subheader("❌ Missing Skills")
     st.write(missing_skills)
+    # -------------------------
+    # PROJECTED IMPROVEMENT
+    # -------------------------
+    if missing_skills:
+        potential_skill_score = 40
+        potential_job_score = 30
+
+        projected_score = potential_skill_score + potential_job_score + experience_component + education_component
+        projected_score = min(projected_score, 100)
+
+        st.subheader("🚀 Projected ATS Score After Improvements")
+
+        st.info(
+            f"If you add the missing skills, your ATS score can improve "
+            f"from {round(ats_score,2)} → {round(projected_score,2)}"
+        )
 
     # -------------------------
     # IMPROVEMENT SUGGESTIONS
@@ -212,6 +305,21 @@ if uploaded_file is not None:
 
         with open(file_path, "rb") as f:
             st.download_button("Click Here to Download", f, file_name="Resume_Report.pdf")
+            st.markdown("""
+---
+### 🧠 How This System Works
+
+This AI Resume Analyzer uses structured scoring logic based on:
+
+• Skill relevance matching  
+• Experience detection  
+• Education qualification parsing  
+• Weighted ATS compatibility scoring  
+• Predictive improvement modeling  
+
+The system evaluates resume strength and estimates potential score improvements
+based on missing skill additions.
+""")
 
     st.markdown("---")
     st.caption("⚠ Note: This system provides automated analysis based on keyword matching. It may not fully represent the candidate's complete capability or experience.")
