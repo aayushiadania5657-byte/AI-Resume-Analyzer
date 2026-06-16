@@ -45,17 +45,54 @@ st.markdown("<hr>", unsafe_allow_html=True)
 # -------------------------
 skills_db = {
     "Data Analyst": ["python", "sql", "excel", "power bi", "statistics", "tableau"],
+
     "Web Developer": ["html", "css", "javascript", "react", "node", "bootstrap"],
+
     "Java Developer": ["java", "spring", "hibernate", "jdbc", "oop", "mysql"],
+
     "Python Developer": ["python", "django", "flask", "pandas", "numpy"],
+
     "Software Engineer": ["data structures", "algorithms", "oop", "git", "problem solving"],
-    "HR Manager": ["recruitment", "communication", "interviewing", "payroll", "hr policies"],
-    "Marketing Executive": ["seo", "digital marketing", "social media", "branding", "sales"],
-    "Graphic Designer": ["photoshop", "illustrator", "figma", "creativity", "canva"]
+
+    "Mechanical Engineer": [
+        "autocad", "solidworks", "catia",
+        "thermodynamics", "machine design",
+        "manufacturing", "ansys"
+    ],
+
+    "Civil Engineer": [
+        "autocad", "staad pro",
+        "surveying", "construction",
+        "structural analysis"
+    ],
+
+    "Electrical Engineer": [
+        "power systems",
+        "electrical machines",
+        "circuit design",
+        "matlab",
+        "plc"
+    ],
+
+    "HR Manager": [
+        "recruitment", "communication",
+        "interviewing", "payroll", "hr policies"
+    ],
+
+    "Marketing Executive": [
+        "seo", "digital marketing",
+        "social media", "branding", "sales"
+    ],
+
+    "Graphic Designer": [
+        "photoshop", "illustrator",
+        "figma", "creativity", "canva"
+    ]
 }
 
 selected_role = st.sidebar.selectbox("🎯 Select Job Role", list(skills_db.keys()))
 uploaded_file = st.file_uploader("Upload Resume (PDF only)", type=["pdf"])
+st.info("📌 Select the job role that best matches your target career before analyzing the resume.")
 st.markdown("""
 <div style="
     background-color:#1e293b;
